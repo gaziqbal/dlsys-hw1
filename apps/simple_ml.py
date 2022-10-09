@@ -1,9 +1,11 @@
-import struct
 import gzip
+import os
+import struct
+import sys
+
 import numpy as np
 
-import sys
-sys.path.append('python/')
+sys.path.append(os.path.join(os.path.dirname(__file__), "../python/"))
 import needle as ndl
 
 

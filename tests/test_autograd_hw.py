@@ -1,6 +1,9 @@
 import sys
-sys.path.append('./python')
-sys.path.append('./apps')
+import os
+
+sys.path.append(os.path.join(os.path.dirname(__file__), "../apps/"))
+sys.path.append(os.path.join(os.path.dirname(__file__), "../python/"))
+
 from simple_ml import *
 import numdifftools as nd
 
