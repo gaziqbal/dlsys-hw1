@@ -116,7 +116,33 @@ def nn_epoch(X, y, W1, W2, lr = 0.1, batch=100):
     """
 
     ### BEGIN YOUR SOLUTION
-    raise NotImplementedError()
+    num_examples = X.shape[0]
+    num_classes = W2.shape[1]
+
+    for i in range(0, num_examples, batch):
+        X_batch = X[i:i+batch]
+
+        # One hot encoding (batch_size x num_classes)
+        Y_batch = y[i:i+batch]
+        batch_size = Y_batch.shape[0]
+        I = np.zeros((batch_size, num_classes))
+        I[np.arange(batch_size), Y_batch] = 1
+        I_t = ndl.Tensor(I)
+
+        X_batch_t = ndl.Tensor(X_batch)
+        Relu_t = ndl.relu(X_batch_t @ W1)
+        Z_t = Relu_t @ W2
+
+        loss = softmax_loss(Z_t, I_t)
+        loss.backward()
+
+        W1_update = W1.numpy() - (lr * W1.grad.numpy())
+        W2_update = W2.numpy() - (lr * W2.grad.numpy())
+
+        W1 = ndl.Tensor(W1_update)
+        W2 = ndl.Tensor(W2_update)
+
+    return W1, W2        
     ### END YOUR SOLUTION
 
 

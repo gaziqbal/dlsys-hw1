@@ -308,16 +308,19 @@ def exp(a):
     return Exp()(a)
 
 
-# TODO
 class ReLU(TensorOp):
     def compute(self, a):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        n = a.copy()
+        n[n < 0] = 0
+        return n
         ### END YOUR SOLUTION
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        n = node.realize_cached_data().copy()
+        n[n > 0] = 1
+        return multiply(Tensor(n), out_grad)
         ### END YOUR SOLUTION
 
 
