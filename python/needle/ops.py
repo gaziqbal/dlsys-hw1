@@ -183,15 +183,15 @@ class BroadcastTo(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        input_shape = node.inputs[0].shape
+        target_shape = node.inputs[0].shape
         grad_shape = out_grad.shape
-        target_shape = list(input_shape) + ([1] * (len(grad_shape) - len(input_shape)))
+        sum_shape = list(target_shape) + ([1] * (len(grad_shape) - len(target_shape)))
         sum_axes = []
-        for index, (grad, target) in enumerate(zip(grad_shape, target_shape)):
+        for index, (grad, target) in enumerate(zip(grad_shape, sum_shape)):
             if target < grad:
                 sum_axes.append(index)
         out_grad = summation(out_grad, tuple(sum_axes))
-        return reshape(out_grad, input_shape)
+        return reshape(out_grad, target_shape)
         ### END YOUR SOLUTION
 
 
@@ -233,7 +233,23 @@ class MatMul(TensorOp):
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
         lhs, rhs = node.inputs
-        return matmul(out_grad, transpose(rhs)), matmul(transpose(lhs), out_grad)
+        lgrad = matmul(out_grad, transpose(rhs))
+        rgrad = matmul(transpose(lhs), out_grad)
+
+        def mm_reshape(m, target_shape):
+            input_shape = m.shape
+            target_shape = ([1] * (len(input_shape) - len(target_shape))) + list(target_shape)
+            if input_shape != target_shape:
+                sum_axes = []
+                for index, (input, target) in enumerate(zip(input_shape, target_shape)):
+                    if target < input:
+                        sum_axes.append(index)
+                m = summation(m, tuple(sum_axes))
+            return m
+
+        lgrad = mm_reshape(lgrad, lhs.shape)
+        rgrad = mm_reshape(rgrad, rhs.shape)
+        return lgrad, rgrad
         ### END YOUR SOLUTION
 
 
