@@ -1,6 +1,6 @@
 """Core data structures."""
 import needle
-from typing import List, Optional, NamedTuple, Tuple, Union
+from typing import List, Optional, NamedTuple, Tuple, Union, Dict
 from collections import namedtuple
 import numpy
 
@@ -399,7 +399,21 @@ def compute_gradient_of_variables(output_tensor, out_grad):
     reverse_topo_order = list(reversed(find_topo_sort([output_tensor])))
 
     ### BEGIN YOUR SOLUTION
-    raise NotImplementedError()
+    for node in reverse_topo_order:
+        adjoints = node_to_output_grads_list[node]
+        op = node.op
+        if not op:
+            continue
+        summed_adjoints = sum_node_list(adjoints)
+        grads = op.gradient(summed_adjoints, node)
+        grads = (grads,) if type(grads) is not tuple else grads
+        for input, grad in zip(node.inputs, grads):
+            grads_list = node_to_output_grads_list.get(input, None)
+            if not grads_list:
+                grads_list = []
+                node_to_output_grads_list[input] = grads_list
+            grads_list.append(grad)
+            input.grad = sum_node_list(grads_list)
     ### END YOUR SOLUTION
 
 
@@ -412,14 +426,31 @@ def find_topo_sort(node_list: List[Value]) -> List[Value]:
     sort.
     """
     ### BEGIN YOUR SOLUTION
-    raise NotImplementedError()
+    visited = set()
+    topo_sorted = []
+    topo_sort_dfs(node_list[0], visited, topo_sorted)
+    return topo_sorted
     ### END YOUR SOLUTION
 
 
-def topo_sort_dfs(node, visited, topo_order):
+def topo_sort_dfs(node, visited, topo_sorted):
     """Post-order DFS"""
     ### BEGIN YOUR SOLUTION
-    raise NotImplementedError()
+    stack = []
+    last_visited = None
+    while stack or node:
+        if node:
+            stack.append(node)
+            node = node.inputs[0] if len(node.inputs) else None
+        else:
+            peek = stack[-1]
+            if len(peek.inputs) == 2 and last_visited != peek.inputs[1]:
+                node = peek.inputs[1]
+            else:
+                if peek not in visited:
+                    topo_sorted.append(peek)
+                    visited.add(peek)
+                last_visited = stack.pop()
     ### END YOUR SOLUTION
 
 
