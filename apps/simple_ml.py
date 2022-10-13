@@ -32,7 +32,34 @@ def parse_mnist(image_filesname, label_filename):
                 for MNIST will contain the values 0-9.
     """
     ### BEGIN YOUR SOLUTION
-    raise NotImplementedError()
+    # read images
+    with gzip.open(image_filesname, "rb") as image_file:
+        header_bytes = image_file.read(16)
+        header, num_images, num_rows, num_columns = struct.unpack(
+            '>Iiii', header_bytes)
+        if header != 0x00000803:
+            raise Exception("invalid header for image file")
+        image_size = num_rows * num_columns
+        dataset_size = num_images * image_size
+        image_data = np.frombuffer(
+            image_file.read(dataset_size), dtype=np.uint8)
+        # normalize
+        min = np.min(image_data)
+        max = np.max(image_data)
+        image_data = (image_data - min) / (max - min)
+        # shape
+        images = np.reshape(image_data.astype(
+            np.float32), (num_images, image_size))
+
+    # read labels
+    with gzip.open(label_filename, "rb") as label_file:
+        header_bytes = label_file.read(8)
+        header, num_labels = struct.unpack('>Ii', header_bytes)
+        if header != 0x00000801:
+            raise Exception("invalid header for label file")
+        labels = np.frombuffer(label_file.read(num_labels), dtype=np.uint8)
+
+    return images, labels
     ### END YOUR SOLUTION
 
 
@@ -53,7 +80,14 @@ def softmax_loss(Z, y_one_hot):
         Average softmax loss over the sample. (ndl.Tensor[np.float32])
     """
     ### BEGIN YOUR SOLUTION
-    raise NotImplementedError()
+    z_exp = ndl.exp(Z)
+    z_sum = ndl.summation(z_exp, axes=(1,))
+    z_log = ndl.log(z_sum)
+    z_y = ndl.summation(ndl.multiply(Z, y_one_hot), axes=(1,))
+    z_diff = z_log - z_y
+    z_diff_sum = ndl.summation(z_diff, axes=(0,))
+    softmax = ndl.divide_scalar(z_diff_sum, Z.shape[0])
+    return softmax
     ### END YOUR SOLUTION
 
 

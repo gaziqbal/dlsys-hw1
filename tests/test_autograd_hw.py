@@ -22,7 +22,7 @@ def test_divide_forward():
 
 
 def test_divide_scalar_forward():
-    np.testing.assert_allclose(ndl.divide_scalar(ndl.Tensor([[1.7 , 1.45]]), scalar=12).numpy(), 
+    np.testing.assert_allclose(ndl.divide_scalar(ndl.Tensor([[1.7 , 1.45]]), scalar=12).numpy(),
         np.array([[0.141666666667, 0.120833333333]]))
 
 
@@ -560,11 +560,13 @@ def test_softmax_loss_ndl():
     X,y = parse_mnist("data/train-images-idx3-ubyte.gz",
                       "data/train-labels-idx1-ubyte.gz")
     np.random.seed(0)
-    Z = ndl.Tensor(np.zeros((y.shape[0], 10)).astype(np.float32))
     y_one_hot = np.zeros((y.shape[0], 10))
     y_one_hot[np.arange(y.size), y] = 1
     y = ndl.Tensor(y_one_hot)
+
+    Z = ndl.Tensor(np.zeros((y.shape[0], 10)).astype(np.float32))
     np.testing.assert_allclose(softmax_loss(Z,y).numpy(), 2.3025850, rtol=1e-6, atol=1e-6)
+
     Z = ndl.Tensor(np.random.randn(y.shape[0], 10).astype(np.float32))
     np.testing.assert_allclose(softmax_loss(Z,y).numpy(), 2.7291998, rtol=1e-6, atol=1e-6)
 

@@ -201,6 +201,7 @@ def broadcast_to(a, shape):
 
 class Summation(TensorOp):
     def __init__(self, axes: Optional[tuple] = None):
+        assert axes is None or isinstance(axes, tuple)
         self.axes = axes
 
     def compute(self, a):
@@ -281,7 +282,8 @@ class Log(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        input = node.inputs[0]
+        return power_scalar(input, -1) * out_grad
         ### END YOUR SOLUTION
 
 
@@ -297,7 +299,8 @@ class Exp(TensorOp):
 
     def gradient(self, out_grad, node):
         ### BEGIN YOUR SOLUTION
-        raise NotImplementedError()
+        input = node.inputs[0]
+        return exp(input) * out_grad
         ### END YOUR SOLUTION
 
 
